@@ -1,0 +1,321 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Rock, Paper, Scissors</title>
+    <style>
+       body {
+        font-family: Arial, sans-serif;
+        text-align: center;
+        background: linear-gradient(to bottom, #667db6, #0082c8, #0082c8, #667db6);
+        margin: 0;
+        padding: 0;
+        color: #333;
+    }
+
+    h1 {
+        margin-top: 20px;
+        color: #fff;
+        text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.3);
+    }
+
+        .game-container {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            margin-top: 10px;
+            padding: 2px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        }
+
+        .choice {
+            flex: 1;
+            max-width: 50%;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .choice video,
+        .choice img {
+            max-width: 100%;
+            max-height: 100%;
+        }
+
+        .video-container {
+            position: relative;
+            width: 100%;
+            max-width: 750px;
+            margin: 0 auto;
+            padding-bottom: 25%; /* Adjust the aspect ratio as needed */
+        }
+
+        .video-container video,
+        .video-container img {
+            position: absolute;
+            width: 100%;
+            height: 100%;
+        }
+
+        .scoreboard {
+            display: flex;
+            justify-content: space-around;
+            align-items: center;
+            color: solid black;
+            margin-top: 4px;
+            font-size: large;
+        }
+        #resetBtn{
+            color: red;
+        }
+
+        .btn-container {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            margin-top: 10px;
+        }
+
+        .button {
+        background-color: #ff6f69;
+        border: none;
+        padding: 1px 7px;
+        text-align: center;
+        text-decoration: none;
+        display: inline-block;
+        font-size: 15px;
+        margin: 0 50px;
+        cursor: pointer;
+        overflow: hidden;
+        position: relative;
+        border-radius: 20px;
+        transition: background-color 0.3s, transform 0.3s;
+        box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+        color: #fff;
+    }
+
+    .button:hover {
+        background-color: #e74c3c;
+        transform: scale(1.05);
+    }
+
+    #messageArea {
+        margin-top: 20px;
+        font-size: 18px;
+        color: #333;
+        text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.5);
+    }
+
+        @media screen and (max-width: 768px) {
+            /* Adjust styles for smaller screens */
+            .video-container {
+                max-width: 100%;
+                padding-bottom: 75%; /* Adjust the aspect ratio as needed */
+            }
+
+            .scoreboard {
+                flex-direction: column;
+                align-items: center;
+            }
+        }
+
+        @media screen and (min-width: 1200px) {
+            /* Adjust styles for larger screens */
+            .scoreboard {
+                flex-direction: row;
+                justify-content: space-around;
+            }
+        }
+    </style>
+</head>
+<body>
+    <h1>Rock, Paper, Scissors</h1>
+    <div class="game-container">
+        <div class="choice" id="playerChoice"></div>
+        <div class="choice" id="computerChoice"></div>
+        <div class="video-container">
+            <img id="defaultGif" src="gif/rockpaperscissor.gif" style="display: block; width: 100%;">
+            <img id="scissorVsRockGif" src="gif/scissorvsrock.gif" style="display: none;">
+            <img id="rockVsRockGif" src="gif/rockvsrock.gif" style="display: none;">
+            <img id="tieGif" src="gif/tie.gif" style="display: none;">
+            <img id="scissorVsPaperGif" src="gif/scissorvspaper.gif" style="display: none;">
+            <img id="rockVsScissorsGif" src="gif/rockvsscissor.gif" style="display: none;">
+            <video id="rockVsPaperVideo" src="vid/rockvspaper.mp4" style="display: none;" autoplay muted></video>
+        </div>
+    </div>
+    <div class="scoreboard">
+        <div>Player Score: <b id="playerScoreDisplay">0</b></div>
+        <div>Computer Score: <b id="computerScoreDisplay">0</b></div>
+        <div>Ties: <b id="tieDisplay">0</b></div>
+        <div>Number of Rounds: <b id="matchRoundDisplay">0</b></div>
+    </div>
+    <div class="btn-container">
+        <button class="button" onclick="startGame('Rock')"><img src="img/rock.png" style="width: 35%;" alt="rock"></button>
+        <button class="button" onclick="startGame('Paper')"><img src="img/paper.png" style="width: 35%;" alt="paper"></button>
+        <button class="button" onclick="startGame('Scissors')"><img src="img/scissor.png" style="width: 35%;" alt="scissor"></button>
+    </div>
+    <div class="btn-container">
+        <button class="button" id="resetBtn" onclick="resetGame()">Reset</button>
+    </div>
+    <div id="messageArea"></div>
+    <script>
+        let choices = ["Rock", "Paper", "Scissors"];
+        let playerScore = 0;
+        let computerScore = 0;
+        let matchRound = 0;
+        let tie = 0;
+        let currentVideo = null;
+
+        function startGame(humanChoice) {
+    resetVideo();
+    hideAllGifs();
+    let computerChoice = choices[Math.floor(Math.random() * 3)];
+    document.getElementById('messageArea').innerHTML = "You chose: " + humanChoice + "<br>";
+
+    const randomEvent = Math.random();
+    if (randomEvent < 0.1) {
+        document.getElementById('messageArea').innerHTML += "Computer curse: Computer's choice is your outcome!<br>";
+        humanChoice = computerChoice;
+    } else if (randomEvent < 0.2) {
+        document.getElementById('messageArea').innerHTML += "Tiebreaker: Both players tie!<br>";
+        humanChoice = computerChoice;
+    }
+
+    document.getElementById('messageArea').innerHTML += "The computer chose: " + computerChoice + "<br>";
+
+    if (humanChoice === "Rock" && computerChoice === "Paper") {
+        currentVideo = 'rockVsPaperVideo';
+    } else if (humanChoice === "Scissors" && computerChoice === "Paper") {
+        document.getElementById('scissorVsPaperGif').style.display = 'block';
+    } else if (humanChoice === "Rock" && computerChoice === "Scissors") {
+        document.getElementById('rockVsScissorsGif').style.display = 'block';
+    } else if (humanChoice === "Scissors" && computerChoice === "Rock") {
+        document.getElementById('scissorVsRockGif').style.display = 'block';
+    } else if (humanChoice === "Rock" && computerChoice === "Rock") {
+        document.getElementById('rockVsRockGif').style.display = 'block';
+    }
+
+    if (currentVideo) {
+        document.getElementById(currentVideo).style.display = 'block';
+        document.getElementById(currentVideo).play();
+    }
+
+
+    if (humanChoice === "Rock") {
+        if (computerChoice === "Rock") {
+            document.getElementById('messageArea').innerHTML += "It's a tie<br>";
+            showMatchRound();
+            showTie();
+            document.getElementById('tieGif').style.display = 'block';
+        } else if (computerChoice === "Paper") {
+            document.getElementById('messageArea').innerHTML += "You Lose!<br>";
+            showComputerScore();
+            showMatchRound();
+        } else if (computerChoice === "Scissors") {
+            document.getElementById('messageArea').innerHTML += "You Win!<br>";
+            showPlayerScore();
+            showMatchRound();
+        }
+    } else if (humanChoice == "Paper") {
+        if (computerChoice == "Paper") {
+            document.getElementById('messageArea').innerHTML += "It's a tie<br>";
+            showMatchRound();
+            showTie();
+            document.getElementById('tieGif').style.display = 'block';
+        } else if (computerChoice == "Scissors") {
+            document.getElementById('messageArea').innerHTML += "You Lose!<br>";
+            showComputerScore();
+            showMatchRound();
+        } else if (computerChoice == "Rock") {
+            document.getElementById('messageArea').innerHTML += "You Win!<br>";
+            showPlayerScore();
+            showMatchRound();
+        }
+    } else if (humanChoice == "Scissors") {
+        if (computerChoice == "Scissors") {
+            document.getElementById('messageArea').innerHTML += "It's a tie<br>";
+            showMatchRound();
+            showTie();
+            document.getElementById('tieGif').style.display = 'block';
+        } else if (computerChoice == "Rock") {
+            document.getElementById('messageArea').innerHTML += "You Lose!<br>";
+            showComputerScore();
+            showMatchRound();
+        } else if (computerChoice == "Paper") {
+            document.getElementById('messageArea').innerHTML += "You Win!<br>";
+            showPlayerScore();
+            showMatchRound();
+        }
+    }
+
+    document.getElementById('playerChoice').classList.add('shake');
+    document.getElementById('computerChoice').classList.add('shake');
+
+    // Hide the default GIF
+    document.getElementById('defaultGif').style.display = 'none';
+
+    setTimeout(() => {
+        document.getElementById('playerChoice').classList.remove('shake');
+        document.getElementById('computerChoice').classList.remove('shake');
+    }, 500);
+}
+
+        function resetVideo() {
+            if (currentVideo) {
+                document.getElementById(currentVideo).style.display = 'none';
+                document.getElementById(currentVideo).pause();
+                currentVideo = null;
+            }
+            document.getElementById('scissorVsRockGif').style.display = 'none';
+            document.getElementById('rockVsRockGif').style.display = 'none';
+            document.getElementById('tieGif').style.display = 'none';
+        }
+
+        function showPlayerScore() {
+            playerScore++;
+            document.getElementById('playerScoreDisplay').innerHTML = playerScore;
+        }
+
+        function showComputerScore() {
+            computerScore++;
+            document.getElementById('computerScoreDisplay').innerHTML = computerScore;
+        }
+
+        function showMatchRound() {
+            matchRound++;
+            document.getElementById('matchRoundDisplay').innerHTML = matchRound;
+        }
+
+        function showTie() {
+            tie++;
+            document.getElementById('tieDisplay').innerHTML = tie;
+        }
+        function hideAllGifs() {
+    document.getElementById('rockVsPaperVideo').style.display = 'none';
+    document.getElementById('rockVsScissorsGif').style.display = 'none';
+    document.getElementById('scissorVsRockGif').style.display = 'none';
+    document.getElementById('rockVsRockGif').style.display = 'none';
+    document.getElementById('scissorVsPaperGif').style.display = 'none';
+    // Add similar lines for other GIFs or videos
+}
+
+        function resetGame() {
+            resetVideo();
+            playerScore = 0;
+            computerScore = 0;
+            matchRound = 0;
+            tie = 0;
+
+            document.getElementById('playerScoreDisplay').innerHTML = playerScore;
+            document.getElementById('computerScoreDisplay').innerHTML = computerScore;
+            document.getElementById('matchRoundDisplay').innerHTML = matchRound;
+            document.getElementById('tieDisplay').innerHTML = tie;
+            document.getElementById('messageArea').innerHTML = "";
+            document.getElementById('playerChoice').innerHTML = "";
+            document.getElementById('computerChoice').innerHTML = "";
+            document.getElementById('defaultGif').style.display = 'block';
+        }
+    </script>
+</body>
+</html>
